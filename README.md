@@ -1,148 +1,180 @@
-# NIRIKSHAK — AI-Powered Revenue Leakage Detection
+<div align="center">
 
-Full-stack scaffold implementing the workflow from the "NIRIKSHAK" pitch deck
-(Team ASTRA): invoice ↔ GSTR-2B reconciliation with a validation layer, an
-adaptive mismatch-detection engine, a feedback loop, and dual-format
-reporting (human JSON + machine XML).
+# 🔍 NIRIKSHAK
 
-## Stack (matches slide 5 of the deck)
+### AI-Powered Revenue Leakage Detection
 
-- **Frontend:** React (Vite) + Material UI + Recharts
-- **Backend:** Node.js + Express
-- **Database:** MongoDB (via Mongoose)
-- **Data format:** XML (machine output) + JSON (human report)
+**Full-stack prototype implementing invoice ↔ GSTR-2B reconciliation with adaptive mismatch detection, feedback-driven learning, and dual-format reporting.**
 
-## What's implemented vs. simplified
+Built by **Team ASTRA**
 
-This is a working prototype, not a production system. A few things are
-intentionally simplified — see **Known gaps** below before treating this as
-demo-ready for a real business:
+---
 
-| Slide claim | This implementation |
+![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black)
+![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=flat-square&logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/Express-4-000000?style=flat-square)
+![MongoDB](https://img.shields.io/badge/MongoDB-7-47A248?style=flat-square&logo=mongodb&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-5-646CFF?style=flat-square&logo=vite&logoColor=white)
+![Material UI](https://img.shields.io/badge/Material_UI-5-007FFF?style=flat-square&logo=mui&logoColor=white)
+
+</div>
+
+---
+
+## ✨ Features
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### 🧾 GST Reconciliation
+- Upload invoices & GSTR-2B records (CSV / JSON)
+- Intelligent mismatch detection with risk scoring
+- Confirm / False Positive feedback loop
+- Adaptive weights that learn from corrections
+
+</td>
+<td width="50%" valign="top">
+
+### 📊 Revenue Risk Analysis
+- Detect unusual discounts & refunds
+- Flag overdue payments & failed renewals
+- Predict customer churn risk (explainable scoring)
+- Revenue-risk scoring (0–100) with recovery estimates
+
+</td>
+</tr>
+</table>
+
+<br>
+
+| Capability | Status |
 |---|---|
-| "Direct, automated fetch... from the GST portal" | GSTR-2B data is uploaded as CSV (real GSTR-2B ingestion needs a licensed GSP/API integration and OAuth with the GST portal — out of scope for a prototype) |
-| "Adaptive AI Model... learns recurring error patterns" | A transparent rule-based reconciliation engine whose per-mismatch-type risk weights are adjusted by user feedback (Confirm / False Positive) — this is genuinely adaptive, but it is not a trained ML classifier. Swapping in `services/adaptiveAI.js`'s scoring for a real model (e.g. an anomaly-detection classifier trained on `PatternWeight` history) is the natural next step and matches the "Scikit-learn / TensorFlow" line in the deck |
-| "Data Validation: Python, Pandas, NumPy" | Implemented in Node.js (`services/validation.js`) to keep one runtime for the prototype. If you want the Python/Pandas layer specifically, it can run as a small separate microservice the backend calls before insert — ask and I can add it |
-| Dual-format output | Fully implemented: `GET /api/analysis/report/json` and `GET /api/analysis/report/xml` |
+| 📤 CSV / JSON upload for invoices & GSTR-2B | ✅ Implemented |
+| 🔄 Adaptive reconciliation engine with feedback | ✅ Implemented |
+| 📋 Dual-format reports (JSON + XML) | ✅ Implemented |
+| 💰 Revenue leakage & churn prediction module | ✅ Implemented |
+| 🔐 Authentication & multi-tenant isolation | ❌ Not yet |
+| 🌐 Live GST portal integration | ❌ Not yet |
 
-## Project structure
+---
 
-```
-nirikshak/
-  backend/
-    server.js              # Express app entry point
-    models/                 # Invoice, GSTRecord, Mismatch, PatternWeight
-    routes/                 # invoices, gst, analysis
-    services/
-      validation.js         # GSTIN/format/math validation layer
-      parseCsv.js
-      adaptiveAI.js          # reconciliation engine + feedback-driven weights
-      report.js              # JSON + XML report builders
-    seed/sampleData.js       # demo data with intentional mismatches
-  frontend/
-    src/
-      App.jsx
-      components/            # UploadPanel, Dashboard, RiskChart, MismatchTable, SummaryCards
-      api/client.js
-  sample-data/                # CSVs you can upload through the UI to test manually
-```
+## 🚀 Quick Start
 
-## Setup
+### Prerequisites
 
-### 1. Prerequisites
-- Node.js 18+
-- MongoDB running locally (or a connection string to Atlas/hosted Mongo)
+- **Node.js** 18+
+- **MongoDB** running locally (or a connection string to Atlas)
 
-### 2. Backend
+### 1. Backend
 
 ```bash
 cd backend
-cp .env.example .env    # edit MONGO_URI if not using local default
+cp .env.example .env       # edit MONGO_URI if needed
 npm install
-npm run seed             # optional: loads demo invoices + GSTR-2B data with built-in mismatches
-npm run dev               # starts on http://localhost:5000
+npm run seed                # optional: loads demo data with built-in mismatches
+npm run dev                 # → http://localhost:5000
 ```
 
-### 3. Frontend
+### 2. Frontend
 
 ```bash
 cd frontend
 npm install
-npm run dev                # starts on http://localhost:5173, proxies /api to :5000
+npm run dev                 # → http://localhost:5173 (proxies /api to :5000)
 ```
 
-Open http://localhost:5173. If you ran `npm run seed`, click **Run Analysis**
-immediately to see flagged mismatches. Otherwise upload the CSVs in
-`sample-data/` (or your own, same column layout) and then click **Run
-Analysis**.
+### 3. Try it out
 
-### 4. Try the feedback loop
+Open **http://localhost:5173**
 
-Click the ✔ (confirm) or ✕ (false positive) icon on a flagged row. That
-mismatch type's weight in `PatternWeight` shifts, so its risk score on future
-runs moves up or down — the "Continuous Feedback Loop" from the deck.
+> If you ran `npm run seed`, click **Run Analysis** immediately to see flagged mismatches.
+> Otherwise, upload the CSVs in `sample-data/` and then click **Run Analysis**.
 
-## Revenue Leakage & Risk module
+### 4. Test the feedback loop
 
-A second module, reachable from the hamburger menu (**☰ → Revenue Leakage &
-Risk**) alongside GST Reconciliation, analyzes transaction/payment/customer
-data end-to-end:
+Click the **✔** (confirm) or **✕** (false positive) icon on a flagged row. That mismatch type's weight shifts — its risk score on future runs moves up or down. This is the **Continuous Feedback Loop** in action.
 
-- Detects unusual discounts and refunds
-- Detects overdue payments and failed renewals
-- Predicts customers likely to churn (recency, spend trend, complaints,
-  failed renewals — a transparent, explainable scoring model, same
-  philosophy as the reconciliation engine)
-- Produces a 0-100 revenue-risk score, with a plain-language explanation and
-  recommended corrective actions per flagged item
-- Estimates potentially recoverable revenue per leak type
+---
 
-Try it with `sample-data/transactions_sample.csv`,
-`sample-data/payments_sample.csv`, and `sample-data/customers_sample.csv` —
-upload all three in the module's upload panel, then click **Run
-Revenue-Risk Analysis**.
+## 🏗️ Architecture
 
-Backend pieces: `backend/models/{Transaction,Payment,Customer,RevenueLeak}.js`,
-`backend/services/revenueRisk.js`, `backend/routes/revenue.js` (mounted at
-`/api/revenue`). Frontend pieces: `frontend/src/pages/RevenueRiskPage.jsx`
-and `frontend/src/components/revenue/*`. Like the reconciliation module,
-this is a rule-based engine, not a trained ML classifier — the next step for
-churn prediction specifically would be a classifier trained on historical
-churn outcomes once enough labeled data exists.
+```
+nirikshak/
+├── backend/
+│   ├── server.js                 # Express entry point
+│   ├── models/                   # Invoice, GSTRecord, Mismatch, PatternWeight, …
+│   ├── routes/                   # invoices, gst, analysis, revenue
+│   ├── services/
+│   │   ├── validation.js         # GSTIN / format / math validation
+│   │   ├── parseCsv.js           # CSV parser
+│   │   ├── adaptiveAI.js         # Reconciliation engine + feedback-driven weights
+│   │   ├── revenueRisk.js        # Revenue leakage & churn scoring
+│   │   └── report.js             # JSON + XML report builders
+│   └── seed/sampleData.js        # Demo data with intentional mismatches
+│
+├── frontend/
+│   └── src/
+│       ├── App.jsx
+│       ├── components/           # UploadPanel, Dashboard, RiskChart, MismatchTable, …
+│       └── api/client.js
+│
+└── sample-data/                  # Ready-to-upload CSVs for manual testing
+    ├── transactions_sample.csv
+    ├── payments_sample.csv
+    └── customers_sample.csv
+```
 
-## API summary
+---
 
-| Method & path | Purpose |
+## 📡 API Reference
+
+| Method | Endpoint | Description |
+|:---:|---|---|
+| `POST` | `/api/invoices/upload` | Upload billing-system invoices (CSV or JSON) |
+| `POST` | `/api/gst/upload` | Upload GSTR-2B records |
+| `POST` | `/api/analysis/run` | Run reconciliation & regenerate mismatches |
+| `GET` | `/api/analysis/mismatches` | List mismatches (`?status=`, `?type=`) |
+| `POST` | `/api/analysis/mismatches/:id/feedback` | Submit feedback: `confirmed` or `false_positive` |
+| `GET` | `/api/analysis/summary` | Dashboard summary (counts, ITC at risk, charts) |
+| `GET` | `/api/analysis/report/json` | Human-readable JSON report |
+| `GET` | `/api/analysis/report/xml` | Machine-format XML report |
+| `GET` | `/api/health` | Health check |
+
+---
+
+## ⚖️ What's Real vs. Simplified
+
+| Deck Claim | Implementation |
 |---|---|
-| `POST /api/invoices/upload` | Upload billing-system invoices (CSV file or JSON `{rows:[...]}`) |
-| `POST /api/gst/upload` | Upload GSTR-2B records |
-| `POST /api/analysis/run` | Run reconciliation, regenerate open mismatches |
-| `GET /api/analysis/mismatches` | List mismatches (`?status=`, `?type=`) |
-| `POST /api/analysis/mismatches/:id/feedback` | `{ outcome: "confirmed" \| "false_positive" }` |
-| `GET /api/analysis/summary` | Dashboard summary (counts, ITC at risk, chart data) |
-| `GET /api/analysis/report/json` | Human-readable report |
-| `GET /api/analysis/report/xml` | Machine-format report |
+| *"Direct, automated fetch from the GST portal"* | CSV upload (real GST API integration requires a licensed GSP + OAuth — out of scope for a prototype) |
+| *"Adaptive AI Model… learns recurring error patterns"* | Rule-based engine with **feedback-adjusted risk weights** — genuinely adaptive, not a trained ML classifier. The natural next step is swapping in a real model in `adaptiveAI.js` |
+| *"Data Validation: Python, Pandas, NumPy"* | Implemented in Node.js to keep a single runtime. A Python/Pandas microservice can be added if needed |
+| Dual-format output | ✅ Fully implemented (`GET …/report/json` and `…/report/xml`) |
 
-## Known gaps to close before real use
+---
 
-These are exactly the kind of things worth flagging before calling this
-"complete" — think of this as the design-review list for this build:
+## ⚠️ Known Gaps
 
-1. **No auth.** Every endpoint is open. A real deployment needs per-business
-   auth and multi-tenant data isolation (right now all invoices/GST records
-   share one collection with no `businessId` field).
-2. **No real GST portal integration.** CSV upload stands in for the GSP API
-   call described in the deck.
-3. **Reconciliation is O(n) in memory per run**, fine for a prototype/hackathon
-   dataset, but for large filing volumes it should be moved to a paginated or
-   streaming/aggregation-pipeline approach in MongoDB.
-4. **Tolerance thresholds are global** (`AMOUNT_TOLERANCE`, `AMOUNT_TOLERANCE_PCT`
-   in `.env`) rather than configurable per business or per tax slab.
-5. **No period-close/versioning logic** — re-uploading a period's data doesn't
-   version old records, it just adds more rows, so duplicate detection could
-   misfire across repeated uploads of the same file. Add an idempotency key
-   (e.g. hash of the row) before production use.
-6. **"Adaptive AI" is rule-based + weighted, not a trained model.** That's a
-   deliberate, explainable choice for a compliance tool, but if the deck's
-   "Adaptive AI Model" claim needs to literally be a Scikit-learn/TensorFlow
-   model, that swap happens in `services/adaptiveAI.js`.
+These are the design-review items before this moves beyond a prototype:
+
+1. **No auth** — every endpoint is open; no per-business data isolation yet
+2. **No real GST portal integration** — CSV upload stands in for the GSP API call
+3. **In-memory reconciliation** — O(n) per run, fine for hackathon volumes but needs streaming/aggregation for production filing sizes
+4. **Global tolerance thresholds** — `AMOUNT_TOLERANCE` / `AMOUNT_TOLERANCE_PCT` in `.env` apply to all businesses; should be configurable per tenant
+5. **No period-close / versioning** — re-uploading a period's data adds rows instead of versioning; duplicate detection can misfire across repeated uploads
+6. **Not a trained ML model** — the adaptive scoring is rule-based + weighted; swapping in a classifier (Scikit-learn / TensorFlow) is the planned next step
+
+---
+
+## 📄 License
+
+This project is a prototype built for demonstration purposes.
+
+---
+
+<div align="center">
+
+**Built with ❤️ by Team ASTRA**
+
+</div>
