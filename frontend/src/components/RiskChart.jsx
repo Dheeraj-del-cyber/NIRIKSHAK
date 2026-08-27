@@ -39,8 +39,7 @@ export default function RiskChart({ byType }) {
                 nameKey="name"
                 cx="50%"
                 cy="50%"
-                outerRadius={95}
-                label={(entry) => `${entry.name}: ${entry.value}`}
+                outerRadius={80}
               >
                 {data.map((_, i) => (
                   <Cell key={i} fill={COLORS[i % COLORS.length]} />

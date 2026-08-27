@@ -15,7 +15,7 @@ export const uploadGstFile = (file) => {
 };
 
 export const runAnalysis = () => api.post('/analysis/run');
-export const simulateInvoice = () => api.post('/invoices/simulate');
+export const simulateInvoice = (scenario) => api.post('/invoices/simulate', scenario);
 export const getSummary = () => api.get('/analysis/summary');
 export const getMismatches = (params = {}) => api.get('/analysis/mismatches', { params });
 export const sendFeedback = (id, outcome) =>

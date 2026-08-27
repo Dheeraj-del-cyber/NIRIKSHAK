@@ -48,36 +48,54 @@ router.delete('/', async (req, res) => {
 
 router.post('/simulate', async (req, res) => {
   try {
+    const scenario = req.body || {};
+    const invoiceNo = scenario.invoiceNo || "INV-10452";
+    const gstin = scenario.gstin || "29ABCDE1234F1Z5";
+    const totalValue = scenario.totalValue || 59000;
+    const totalTax = scenario.totalTax || 9000;
+    const gstrTax = scenario.gstrTax !== undefined ? scenario.gstrTax : 8100;
+    
+    const taxableValue = totalValue - totalTax;
+
     const demoInvoice = {
-      invoiceNo: "INV-10452",
-      gstin: "29ABCDE1234F1Z5",
+      invoiceNo,
+      gstin,
       invoiceDate: new Date().toISOString(),
       period: "2024-01",
-      taxableValue: 50000,
-      totalTax: 9000,
-      totalValue: 59000,
-      cgst: 4500,
-      sgst: 4500,
+      taxableValue,
+      totalTax,
+      totalValue,
+      cgst: totalTax / 2,
+      sgst: totalTax / 2,
       igst: 0,
       validation: { isValid: true, errors: [] }
     };
 
-    const demoGstRecord = {
-      invoiceNo: "INV-10452",
-      gstin: "29ABCDE1234F1Z5",
-      invoiceDate: new Date().toISOString(),
-      period: "2024-01",
-      taxableValue: 45000, // Reduced to create mismatch
-      totalTax: 8100, // Reduced to create mismatch
-      totalValue: 53100,
-      cgst: 4050,
-      sgst: 4050,
-      igst: 0,
-      validation: { isValid: true, errors: [] }
-    };
+    const recordsToInsert = [];
+    if (gstrTax > 0) {
+      const gstrTaxableValue = taxableValue * (gstrTax / totalTax);
+      const gstrTotalValue = gstrTaxableValue + gstrTax;
+      
+      const demoGstRecord = {
+        invoiceNo,
+        gstin,
+        invoiceDate: new Date().toISOString(),
+        period: "2024-01",
+        taxableValue: gstrTaxableValue,
+        totalTax: gstrTax,
+        totalValue: gstrTotalValue,
+        cgst: gstrTax / 2,
+        sgst: gstrTax / 2,
+        igst: 0,
+        validation: { isValid: true, errors: [] }
+      };
+      recordsToInsert.push(demoGstRecord);
+    }
 
     await Invoice.insertMany([demoInvoice]);
-    await GSTRecord.insertMany([demoGstRecord]);
+    if (recordsToInsert.length > 0) {
+      await GSTRecord.insertMany(recordsToInsert);
+    }
     
     // Automatically trigger analysis
     const analysisResult = await runReconciliation();

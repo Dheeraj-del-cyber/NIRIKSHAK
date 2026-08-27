@@ -12,6 +12,10 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  CircularProgress,
 } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
@@ -21,6 +25,33 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import PowerIcon from '@mui/icons-material/Power';
 import AutoModeIcon from '@mui/icons-material/AutoMode';
 import { uploadInvoiceFile, uploadGstFile, runAnalysis, simulateInvoice } from '../api/client';
+
+const DEMO_SCENARIOS = [
+  {
+    invoiceNo: "INV-10452",
+    supplier: "ABC Technologies Pvt Ltd",
+    gstin: "29ABCDE1234F1Z5",
+    totalValue: 59000,
+    totalTax: 9000,
+    gstrTax: 8100,
+  },
+  {
+    invoiceNo: "INV-55990",
+    supplier: "Global Logistics",
+    gstin: "27XYZDE9876G2Z4",
+    totalValue: 118000,
+    totalTax: 18000,
+    gstrTax: 0, // Missing in GSTR completely
+  },
+  {
+    invoiceNo: "INV-88221",
+    supplier: "Cloud Hosting Services",
+    gstin: "33AABBC1122C1Z1",
+    totalValue: 23600,
+    totalTax: 3600,
+    gstrTax: 1800, // Partial
+  }
+];
 
 function UploadRow({ icon, label, onFile, result }) {
   return (
@@ -57,6 +88,9 @@ export default function IntegrationPanel({ onAnalysisComplete }) {
   const [gstResult, setGstResult] = useState(null);
   const [error, setError] = useState(null);
   const [running, setRunning] = useState(false);
+  const [showInvoiceDemo, setShowInvoiceDemo] = useState(false);
+  const [scenarioIndex, setScenarioIndex] = useState(0);
+  const currentScenario = DEMO_SCENARIOS[scenarioIndex % DEMO_SCENARIOS.length];
 
   const handleInvoiceFile = async (file) => {
     setError(null);
@@ -92,16 +126,24 @@ export default function IntegrationPanel({ onAnalysisComplete }) {
   };
 
   const handleSimulate = async () => {
-    setError(null);
+    setShowInvoiceDemo(true);
     setRunning(true);
-    try {
-      await simulateInvoice();
-      onAnalysisComplete?.();
-    } catch (err) {
-      setError(err.response?.data?.error || err.message);
-    } finally {
-      setRunning(false);
-    }
+    setError(null);
+    
+    // Fake delay for animation
+    setTimeout(async () => {
+      try {
+        await simulateInvoice(currentScenario);
+        setShowInvoiceDemo(false);
+        setScenarioIndex(i => i + 1);
+        onAnalysisComplete?.();
+      } catch (err) {
+        setError(err.response?.data?.error || err.message);
+        setShowInvoiceDemo(false);
+      } finally {
+        setRunning(false);
+      }
+    }, 2000);
   };
 
   return (
@@ -179,6 +221,39 @@ export default function IntegrationPanel({ onAnalysisComplete }) {
           </AccordionDetails>
         </Accordion>
       </CardContent>
+
+      <Dialog open={showInvoiceDemo} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ textAlign: 'center', pb: 1 }}>
+          Receiving Invoice
+        </DialogTitle>
+        <DialogContent sx={{ textAlign: 'center', pb: 4 }}>
+          <CircularProgress size={60} sx={{ mb: 3, mt: 1 }} />
+          <Box sx={{ bgcolor: 'background.default', p: 2, borderRadius: 1, textAlign: 'left', border: '1px dashed', borderColor: 'divider' }}>
+            <Typography variant="subtitle2" color="text.secondary" gutterBottom>INVOICE DETAILS</Typography>
+            <Stack spacing={1}>
+              <Box display="flex" justifyContent="space-between">
+                <Typography variant="body2">Invoice No:</Typography>
+                <Typography variant="body2" fontWeight="bold">{currentScenario.invoiceNo}</Typography>
+              </Box>
+              <Box display="flex" justifyContent="space-between">
+                <Typography variant="body2">Supplier GSTIN:</Typography>
+                <Typography variant="body2" fontWeight="bold">{currentScenario.gstin}</Typography>
+              </Box>
+              <Box display="flex" justifyContent="space-between">
+                <Typography variant="body2">Total Value:</Typography>
+                <Typography variant="body2" fontWeight="bold">₹{currentScenario.totalValue.toLocaleString('en-IN')}</Typography>
+              </Box>
+              <Box display="flex" justifyContent="space-between">
+                <Typography variant="body2">Total Tax:</Typography>
+                <Typography variant="body2" fontWeight="bold">₹{currentScenario.totalTax.toLocaleString('en-IN')}</Typography>
+              </Box>
+            </Stack>
+          </Box>
+          <Typography variant="body2" color="primary" sx={{ mt: 2 }}>
+            Processing Validation & Reconciliation...
+          </Typography>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
