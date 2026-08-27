@@ -137,16 +137,33 @@ async function runReconciliation() {
 
 function buildMismatch(type, inv, gstRec, weights, { detail }) {
   const base = BASE_SEVERITY[type];
-  const riskScore = Math.max(0, Math.min(100, Math.round(base * weights[type])));
+  let riskScore = Math.max(0, Math.min(100, Math.round(base * weights[type])));
   const source = inv || gstRec;
-  const itcAtRisk =
-    type === 'AMOUNT_MISMATCH' && inv && gstRec
-      ? Math.abs(inv.totalTax - gstRec.totalTax)
-      : type === 'MISSING_IN_GSTR' && inv
-      ? inv.totalTax
-      : type === 'MISSING_INVOICE' && gstRec
-      ? gstRec.totalTax
-      : 0;
+  let expectedAmount = 0, receivedAmount = 0, difference = 0, confidenceScore = riskScore, recommendation = '', isEarlyWarning = false;
+
+  if (type === 'AMOUNT_MISMATCH' && inv && gstRec) {
+    expectedAmount = inv.totalTax;
+    receivedAmount = gstRec.totalTax;
+    difference = Math.abs(expectedAmount - receivedAmount);
+    recommendation = "Review GSTR-2B data for supplier discrepancy. Request amendment if incorrect.";
+  } else if (type === 'MISSING_IN_GSTR' && inv) {
+    expectedAmount = inv.totalTax;
+    difference = expectedAmount;
+    recommendation = "Follow up with supplier to ensure they file their GSTR-1.";
+  } else if (type === 'MISSING_INVOICE' && gstRec) {
+    receivedAmount = gstRec.totalTax;
+    difference = receivedAmount;
+    recommendation = "Verify if invoice was received from supplier or if it is a fraudulent entry.";
+  }
+
+  // Early warning logic
+  if (weights[type] >= 1.1) {
+    isEarlyWarning = true;
+    confidenceScore = Math.min(100, confidenceScore + 20);
+    detail = `[EARLY WARNING] Adaptive AI recognized a confirmed error pattern. ${detail}`;
+  }
+
+  const itcAtRisk = difference;
 
   return {
     invoiceNo: source.invoiceNo,
@@ -156,6 +173,12 @@ function buildMismatch(type, inv, gstRec, weights, { detail }) {
     riskScore,
     itcAtRisk: Math.round(itcAtRisk * 100) / 100,
     details: detail,
+    expectedAmount,
+    receivedAmount,
+    difference,
+    confidenceScore,
+    recommendation,
+    isEarlyWarning,
     invoiceRef: inv ? inv._id : undefined,
     gstRecordRef: gstRec ? gstRec._id : undefined,
     status: 'open',

@@ -12,9 +12,16 @@ import {
   IconButton,
   Tooltip,
   Box,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Alert,
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
+import InfoIcon from '@mui/icons-material/Info';
 
 const TYPE_LABELS = {
   MISSING_IN_GSTR: 'Missing in GSTR-2B',
@@ -31,6 +38,8 @@ function riskColor(score) {
 }
 
 export default function MismatchTable({ mismatches, onFeedback }) {
+  const [selectedMismatch, setSelectedMismatch] = React.useState(null);
+
   return (
     <Card variant="outlined">
       <CardContent>
@@ -60,6 +69,9 @@ export default function MismatchTable({ mismatches, onFeedback }) {
                   <TableCell>{m.invoiceNo}</TableCell>
                   <TableCell>{m.gstin}</TableCell>
                   <TableCell>
+                    {m.isEarlyWarning && (
+                      <Chip size="small" color="error" label="Early Warning" sx={{ mr: 1 }} />
+                    )}
                     <Tooltip title={m.details || ''}>
                       <span>{TYPE_LABELS[m.type] || m.type}</span>
                     </Tooltip>
@@ -83,6 +95,11 @@ export default function MismatchTable({ mismatches, onFeedback }) {
                     />
                   </TableCell>
                   <TableCell align="right">
+                    <Tooltip title="Investigate">
+                      <IconButton size="small" color="primary" onClick={() => setSelectedMismatch(m)}>
+                        <InfoIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
                     {m.status === 'open' && (
                       <>
                         <Tooltip title="Confirm - this is a real issue">
@@ -111,6 +128,69 @@ export default function MismatchTable({ mismatches, onFeedback }) {
           </Table>
         )}
       </CardContent>
+
+      {/* Explainability Dialog */}
+      <Dialog open={!!selectedMismatch} onClose={() => setSelectedMismatch(null)} maxWidth="sm" fullWidth>
+        {selectedMismatch && (
+          <>
+            <DialogTitle>
+              Investigation Details: {selectedMismatch.invoiceNo}
+              {selectedMismatch.isEarlyWarning && (
+                <Chip size="small" color="error" label="AI Early Warning" sx={{ ml: 2 }} />
+              )}
+            </DialogTitle>
+            <DialogContent dividers>
+              <Box mb={2}>
+                <Typography variant="subtitle2" color="text.secondary">Type</Typography>
+                <Typography variant="body1">{TYPE_LABELS[selectedMismatch.type] || selectedMismatch.type}</Typography>
+              </Box>
+              <Box mb={2}>
+                <Typography variant="subtitle2" color="text.secondary">Why it was flagged</Typography>
+                <Typography variant="body1">{selectedMismatch.details}</Typography>
+              </Box>
+              
+              <Box sx={{ display: 'flex', gap: 4, mb: 2 }}>
+                <Box>
+                  <Typography variant="subtitle2" color="text.secondary">What was expected</Typography>
+                  <Typography variant="body1">₹{Number(selectedMismatch.expectedAmount || 0).toLocaleString('en-IN')}</Typography>
+                </Box>
+                <Box>
+                  <Typography variant="subtitle2" color="text.secondary">What was received</Typography>
+                  <Typography variant="body1">₹{Number(selectedMismatch.receivedAmount || 0).toLocaleString('en-IN')}</Typography>
+                </Box>
+                <Box>
+                  <Typography variant="subtitle2" color="text.secondary">Difference</Typography>
+                  <Typography variant="body1" color="error.main" fontWeight={600}>₹{Number(selectedMismatch.difference || 0).toLocaleString('en-IN')}</Typography>
+                </Box>
+              </Box>
+
+              <Box mb={2}>
+                <Typography variant="subtitle2" color="text.secondary">AI Confidence Score</Typography>
+                <Chip size="small" color={riskColor(selectedMismatch.confidenceScore)} label={`${selectedMismatch.confidenceScore}%`} />
+              </Box>
+              
+              {selectedMismatch.recommendation && (
+                <Alert severity="info" sx={{ mt: 2 }}>
+                  <strong>Recommended Action:</strong> {selectedMismatch.recommendation}
+                </Alert>
+              )}
+            </DialogContent>
+            <DialogActions>
+              {selectedMismatch.status === 'open' && (
+                <>
+                  <Button onClick={() => { onFeedback(selectedMismatch._id, 'false_positive'); setSelectedMismatch(null); }}>
+                    Dismiss as False Positive
+                  </Button>
+                  <Button variant="contained" color="error" onClick={() => { onFeedback(selectedMismatch._id, 'confirmed'); setSelectedMismatch(null); }}>
+                    Confirm Error
+                  </Button>
+                </>
+              )}
+              <Button onClick={() => setSelectedMismatch(null)} variant="outlined">Close</Button>
+            </DialogActions>
+          </>
+        )}
+      </Dialog>
     </Card>
   );
 }

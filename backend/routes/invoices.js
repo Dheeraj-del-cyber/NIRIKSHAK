@@ -3,6 +3,8 @@ const multer = require('multer');
 const Invoice = require('../models/Invoice');
 const { validateBatch } = require('../services/validation');
 const { parseCsvBuffer } = require('../services/parseCsv');
+const GSTRecord = require('../models/GSTRecord');
+const { runReconciliation } = require('../services/adaptiveAI');
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -42,6 +44,66 @@ router.get('/', async (req, res) => {
 router.delete('/', async (req, res) => {
   await Invoice.deleteMany({});
   res.json({ ok: true });
+});
+
+router.post('/simulate', async (req, res) => {
+  try {
+    const scenario = req.body || {};
+    const invoiceNo = scenario.invoiceNo || "INV-10452";
+    const gstin = scenario.gstin || "29ABCDE1234F1Z5";
+    const totalValue = scenario.totalValue || 59000;
+    const totalTax = scenario.totalTax || 9000;
+    const gstrTax = scenario.gstrTax !== undefined ? scenario.gstrTax : 8100;
+    
+    const taxableValue = totalValue - totalTax;
+
+    const demoInvoice = {
+      invoiceNo,
+      gstin,
+      invoiceDate: new Date().toISOString(),
+      period: "2024-01",
+      taxableValue,
+      totalTax,
+      totalValue,
+      cgst: totalTax / 2,
+      sgst: totalTax / 2,
+      igst: 0,
+      validation: { isValid: true, errors: [] }
+    };
+
+    const recordsToInsert = [];
+    if (gstrTax > 0) {
+      const gstrTaxableValue = taxableValue * (gstrTax / totalTax);
+      const gstrTotalValue = gstrTaxableValue + gstrTax;
+      
+      const demoGstRecord = {
+        invoiceNo,
+        gstin,
+        invoiceDate: new Date().toISOString(),
+        period: "2024-01",
+        taxableValue: gstrTaxableValue,
+        totalTax: gstrTax,
+        totalValue: gstrTotalValue,
+        cgst: gstrTax / 2,
+        sgst: gstrTax / 2,
+        igst: 0,
+        validation: { isValid: true, errors: [] }
+      };
+      recordsToInsert.push(demoGstRecord);
+    }
+
+    await Invoice.insertMany([demoInvoice]);
+    if (recordsToInsert.length > 0) {
+      await GSTRecord.insertMany(recordsToInsert);
+    }
+    
+    // Automatically trigger analysis
+    const analysisResult = await runReconciliation();
+
+    res.json({ success: true, analysis: analysisResult });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;

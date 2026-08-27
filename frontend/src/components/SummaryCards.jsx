@@ -37,28 +37,36 @@ export default function SummaryCards({ summary }) {
   if (!summary) return null;
   return (
     <Grid container spacing={2}>
-      <Grid item xs={12} sm={4}>
+      <Grid item xs={12} sm={6} md={3}>
         <StatCard
           icon={<WarningAmberIcon />}
-          label="Open Mismatches"
+          label="Mismatches (Action Required)"
           value={summary.openCount}
           color="warning"
         />
       </Grid>
-      <Grid item xs={12} sm={4}>
+      <Grid item xs={12} sm={6} md={3}>
         <StatCard
           icon={<CurrencyRupeeIcon />}
           label="ITC at Risk"
-          value={`₹${summary.totalItcAtRisk?.toLocaleString('en-IN')}`}
+          value={`₹${summary.totalItcAtRisk?.toLocaleString('en-IN') || 0}`}
           color="error"
         />
       </Grid>
-      <Grid item xs={12} sm={4}>
+      <Grid item xs={12} sm={6} md={3}>
         <StatCard
           icon={<FactCheckIcon />}
-          label="Total Reviewed (all-time)"
-          value={summary.totalCount}
+          label="ITC Protected"
+          value={`₹${summary.itcProtected?.toLocaleString('en-IN') || 0}`}
           color="success"
+        />
+      </Grid>
+      <Grid item xs={12} sm={6} md={3}>
+        <StatCard
+          icon={<FactCheckIcon />}
+          label="AI Patterns Learned"
+          value={summary.patternsLearned || 0}
+          color="info"
         />
       </Grid>
     </Grid>

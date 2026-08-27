@@ -38,16 +38,44 @@ async function buildHumanReport() {
     );
   }
 
-  return {
-    generatedAt: new Date().toISOString(),
-    summary: {
-      totalMismatches: mismatches.length,
-      totalItcAtRisk: Math.round(totalItcAtRisk * 100) / 100,
-      byType,
-    },
-    insights,
-    mismatches,
-  };
+  let reportText = `=======================================\n`;
+  reportText += `       NIRIKSHAK EXECUTIVE SUMMARY     \n`;
+  reportText += `=======================================\n\n`;
+  reportText += `Generated At: ${new Date().toLocaleString()}\n\n`;
+  reportText += `[OVERVIEW]\n`;
+  reportText += `- Total Mismatches Flagged: ${mismatches.length}\n`;
+  reportText += `- Total ITC at Risk: ₹${Math.round(totalItcAtRisk * 100) / 100}\n\n`;
+
+  reportText += `[KEY INSIGHTS]\n`;
+  if (insights.length === 0) {
+    reportText += `- No critical insights at this time.\n`;
+  } else {
+    insights.forEach(insight => {
+      reportText += `- ${insight}\n`;
+    });
+  }
+  
+  reportText += `\n[DETAILED MISMATCHES]\n`;
+  if (mismatches.length === 0) {
+    reportText += `No mismatches found.\n`;
+  } else {
+    mismatches.forEach((m, idx) => {
+      reportText += `\n${idx + 1}. Invoice No: ${m.invoiceNo} | GSTIN: ${m.gstin}\n`;
+      reportText += `   Type: ${m.type}\n`;
+      reportText += `   Status: ${m.status.toUpperCase()}\n`;
+      reportText += `   ITC at Risk: ₹${m.itcAtRisk}\n`;
+      reportText += `   Details: ${m.details || 'N/A'}\n`;
+      if (m.isEarlyWarning) {
+        reportText += `   ** AI EARLY WARNING **\n`;
+      }
+    });
+  }
+  
+  reportText += `\n=======================================\n`;
+  reportText += `      END OF REPORT\n`;
+  reportText += `=======================================\n`;
+
+  return reportText;
 }
 
 async function buildMachineXml() {
