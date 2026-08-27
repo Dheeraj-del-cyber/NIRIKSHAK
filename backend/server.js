@@ -9,6 +9,8 @@ const analysisRoutes = require('./routes/analysis');
 const revenueRoutes = require('./routes/revenue');
 const twinRoutes = require('./routes/twin');
 const leakageRoutes = require('./routes/leakage');
+const recoveryRoutes = require('./routes/recovery');
+const insightsRoutes = require('./routes/insights');
 
 const app = express();
 
@@ -24,6 +26,8 @@ app.use('/api/analysis', analysisRoutes);
 app.use('/api/revenue', revenueRoutes);
 app.use('/api/twin', twinRoutes);
 app.use('/api/leakage', leakageRoutes);
+app.use('/api/recovery', recoveryRoutes);
+app.use('/api/insights', insightsRoutes);
 
 // Centralized error handler
 app.use((err, req, res, next) => {

@@ -20,6 +20,8 @@ import FactCheckIcon from '@mui/icons-material/FactCheck';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import HubIcon from '@mui/icons-material/Hub';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import WhatshotIcon from '@mui/icons-material/Whatshot';
 
 const HEADER_HEIGHT = 64;
 const FOOTER_HEIGHT = 48;
@@ -48,6 +50,18 @@ const NAV_ITEMS = [
         label: 'Hidden Leakage & Chain Detection',
         description: 'Leaks only visible when signals are connected',
         icon: <AccountTreeIcon />,
+    },
+    {
+        id: 'recovery-engine',
+        label: 'Recovery Engine',
+        description: 'Simulate recovery odds, let the agent act on confident ones',
+        icon: <AutoAwesomeIcon />,
+    },
+    {
+        id: 'leakage-insights',
+        label: 'Leakage Insights',
+        description: 'Heatmap of where, forecast of what\'s next',
+        icon: <WhatshotIcon />,
     },
 ];
 

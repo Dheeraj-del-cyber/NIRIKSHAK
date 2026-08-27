@@ -4,12 +4,16 @@ import ReconciliationPage from './pages/ReconciliationPage';
 import RevenueRiskPage from './pages/RevenueRiskPage';
 import DigitalTwinPage from './pages/DigitalTwinPage';
 import HiddenLeakagePage from './pages/HiddenLeakagePage';
+import RecoveryEnginePage from './pages/RecoveryEnginePage';
+import LeakageInsightsPage from './pages/LeakageInsightsPage';
 
 const PAGES = {
   reconciliation: ReconciliationPage,
   'revenue-risk': RevenueRiskPage,
   'digital-twin': DigitalTwinPage,
   'hidden-leakage': HiddenLeakagePage,
+  'recovery-engine': RecoveryEnginePage,
+  'leakage-insights': LeakageInsightsPage,
 };
 
 export default function App() {
