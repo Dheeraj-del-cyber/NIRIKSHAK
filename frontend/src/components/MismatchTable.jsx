@@ -51,16 +51,17 @@ export default function MismatchTable({ mismatches, onFeedback }) {
             <Typography color="text.secondary">Nothing flagged yet.</Typography>
           </Box>
         ) : (
-          <Table size="small">
+          <Box sx={{ overflowX: 'auto' }}>
+          <Table size="small" sx={{ minWidth: 650 }}>
             <TableHead>
               <TableRow>
-                <TableCell>Invoice No.</TableCell>
-                <TableCell>GSTIN</TableCell>
+                <TableCell sx={{ whiteSpace: 'nowrap' }}>Invoice No.</TableCell>
+                <TableCell sx={{ whiteSpace: 'nowrap' }}>GSTIN</TableCell>
                 <TableCell>Type</TableCell>
-                <TableCell>Risk</TableCell>
-                <TableCell>ITC at Risk</TableCell>
+                <TableCell sx={{ whiteSpace: 'nowrap' }}>Risk</TableCell>
+                <TableCell sx={{ whiteSpace: 'nowrap' }}>ITC at Risk</TableCell>
                 <TableCell>Status</TableCell>
-                <TableCell align="right">Feedback</TableCell>
+                <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -126,6 +127,7 @@ export default function MismatchTable({ mismatches, onFeedback }) {
               ))}
             </TableBody>
           </Table>
+          </Box>
         )}
       </CardContent>
 
