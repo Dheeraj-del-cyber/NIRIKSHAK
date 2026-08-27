@@ -65,9 +65,10 @@ router.get('/summary', async (req, res) => {
   });
 });
 
-// GET /api/analysis/report/json - human-readable report
-router.get('/report/json', async (req, res) => {
-  res.json(await buildHumanReport());
+// GET /api/analysis/report/txt - human-readable report
+router.get('/report/txt', async (req, res) => {
+  res.set('Content-Type', 'text/plain');
+  res.send(await buildHumanReport());
 });
 
 // GET /api/analysis/report/xml - machine format for retraining/export

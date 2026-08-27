@@ -20,7 +20,7 @@ export const getSummary = () => api.get('/analysis/summary');
 export const getMismatches = (params = {}) => api.get('/analysis/mismatches', { params });
 export const sendFeedback = (id, outcome) =>
   api.post(`/analysis/mismatches/${id}/feedback`, { outcome });
-export const getJsonReportUrl = () => '/api/analysis/report/json';
+export const getTextReportUrl = () => '/api/analysis/report/txt';
 export const getXmlReportUrl = () => '/api/analysis/report/xml';
 
 export default api;
