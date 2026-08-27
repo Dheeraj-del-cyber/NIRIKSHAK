@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { AppBar, Toolbar, Typography, Container, Stack, Chip } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import UploadPanel from './components/UploadPanel';
+import IntegrationPanel from './components/IntegrationPanel';
 import Dashboard from './components/Dashboard';
 
 export default function App() {
@@ -25,7 +25,7 @@ export default function App() {
 
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Stack spacing={4}>
-          <UploadPanel onAnalysisComplete={() => setRefreshKey((k) => k + 1)} />
+          <IntegrationPanel onAnalysisComplete={() => setRefreshKey((k) => k + 1)} />
           <Dashboard refreshKey={refreshKey} />
         </Stack>
       </Container>

@@ -40,6 +40,7 @@ router.post('/mismatches/:id/feedback', async (req, res) => {
 router.get('/summary', async (req, res) => {
   const mismatches = await Mismatch.find().lean();
   const open = mismatches.filter((m) => m.status === 'open');
+  const falsePositives = mismatches.filter((m) => m.status === 'false_positive');
 
   const byType = {};
   for (const m of open) {
@@ -47,12 +48,18 @@ router.get('/summary', async (req, res) => {
   }
 
   const totalItcAtRisk = open.reduce((sum, m) => sum + (m.itcAtRisk || 0), 0);
+  const itcProtected = falsePositives.reduce((sum, m) => sum + (m.itcAtRisk || 0), 0);
   const weights = await PatternWeight.find().lean();
+  
+  // Count how many patterns have been learned (timesConfirmed > 0)
+  const patternsLearned = weights.filter(w => w.timesConfirmed > 0).length;
 
   res.json({
     openCount: open.length,
     totalCount: mismatches.length,
     totalItcAtRisk: Math.round(totalItcAtRisk * 100) / 100,
+    itcProtected: Math.round(itcProtected * 100) / 100,
+    patternsLearned,
     byType,
     weights,
   });
