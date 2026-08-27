@@ -1,34 +1,87 @@
-const mongoose = require('mongoose');
+const { v4: uuidv4 } = require('uuid');
 
 const MISMATCH_TYPES = [
-  'MISSING_IN_GSTR',      // invoice exists in billing system, not in GSTR-2B
-  'MISSING_INVOICE',      // exists in GSTR-2B, not in billing system
-  'AMOUNT_MISMATCH',      // both exist but values differ beyond tolerance
-  'DUPLICATE_INVOICE',    // same invoiceNo+gstin appears more than once
-  'DELAYED_FILING',       // GSTR record filed in a later period than invoice date
+  'MISSING_IN_GSTR',
+  'MISSING_INVOICE',
+  'AMOUNT_MISMATCH',
+  'DUPLICATE_INVOICE',
+  'DELAYED_FILING',
 ];
 
-const MismatchSchema = new mongoose.Schema(
-  {
-    invoiceNo: { type: String, required: true },
-    gstin: { type: String, required: true },
-    period: { type: String, required: true },
-    type: { type: String, enum: MISMATCH_TYPES, required: true },
-    // 0-100. Combines a severity score for the mismatch type with the
-    // adaptive weight learned from past user feedback (services/adaptiveAI.js).
-    riskScore: { type: Number, required: true, min: 0, max: 100 },
-    itcAtRisk: { type: Number, default: 0 }, // rupee value of ITC potentially lost
-    details: { type: String },
-    invoiceRef: { type: mongoose.Schema.Types.ObjectId, ref: 'Invoice' },
-    gstRecordRef: { type: mongoose.Schema.Types.ObjectId, ref: 'GSTRecord' },
-    status: {
-      type: String,
-      enum: ['open', 'confirmed', 'false_positive'],
-      default: 'open',
-    },
-  },
-  { timestamps: true }
-);
+let records = [];
 
-module.exports = mongoose.model('Mismatch', MismatchSchema);
+class MismatchInstance {
+  constructor(data) {
+    Object.assign(this, data);
+    if (!this._id) this._id = uuidv4();
+    if (!this.createdAt) this.createdAt = new Date();
+    this.updatedAt = new Date();
+  }
+  
+  async save() {
+    this.updatedAt = new Date();
+    const idx = records.findIndex(r => r._id === this._id);
+    if (idx >= 0) {
+      records[idx] = this;
+    } else {
+      records.push(this);
+    }
+    return this;
+  }
+}
+
+class MismatchModel {
+  static find(filter = {}) {
+    let result = records;
+    
+    if (filter.status) {
+      result = result.filter(r => r.status === filter.status);
+    }
+    if (filter.type) {
+      result = result.filter(r => r.type === filter.type);
+    }
+
+    const query = {
+      sort: (sortObj) => {
+        if (sortObj && sortObj.riskScore === -1) {
+          result.sort((a, b) => (b.riskScore || 0) - (a.riskScore || 0));
+        }
+        return query;
+      },
+      limit: (n) => {
+        result = result.slice(0, n);
+        return query;
+      },
+      lean: () => {
+        return query;
+      },
+      then: (resolve, reject) => {
+        resolve(result);
+      }
+    };
+    return query;
+  }
+
+  static async findById(id) {
+    const found = records.find(r => r._id === id || r._id.toString() === id.toString());
+    return found ? found : null; // Already an instance of MismatchInstance
+  }
+
+  static async insertMany(docs) {
+    const instances = docs.map(d => new MismatchInstance(d));
+    records.push(...instances);
+    return instances;
+  }
+
+  static async deleteMany(filter = {}) {
+    if (Object.keys(filter).length === 0) {
+      records = [];
+    } else if (filter.status === 'open') {
+      records = records.filter(r => r.status !== 'open');
+    }
+    return { deletedCount: 0 }; // Mocked response
+  }
+}
+
+module.exports = MismatchModel;
 module.exports.MISMATCH_TYPES = MISMATCH_TYPES;

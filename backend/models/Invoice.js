@@ -1,31 +1,43 @@
-const mongoose = require('mongoose');
+const { v4: uuidv4 } = require('uuid');
 
-// Represents an invoice as it exists in the business's own billing system.
-// This is the "left side" of the reconciliation described in slide 3
-// (Data Acquisition -> billing system).
-const InvoiceSchema = new mongoose.Schema(
-  {
-    invoiceNo: { type: String, required: true, trim: true, index: true },
-    gstin: { type: String, required: true, trim: true, uppercase: true, index: true },
-    invoiceDate: { type: Date, required: true },
-    taxableValue: { type: Number, required: true, min: 0 },
-    cgst: { type: Number, default: 0, min: 0 },
-    sgst: { type: Number, default: 0, min: 0 },
-    igst: { type: Number, default: 0, min: 0 },
-    totalTax: { type: Number, required: true, min: 0 },
-    totalValue: { type: Number, required: true, min: 0 },
-    period: { type: String, required: true }, // e.g. "2026-07" - filing period
-    source: { type: String, default: 'billing_system' },
-    // Set by the validation layer (services/validation.js) before an
-    // invoice is considered eligible for reconciliation.
-    validation: {
-      isValid: { type: Boolean, default: true },
-      errors: [{ type: String }],
-    },
-  },
-  { timestamps: true }
-);
+let records = [];
 
-InvoiceSchema.index({ invoiceNo: 1, gstin: 1, period: 1 });
+class InvoiceModel {
+  static find(filter = {}) {
+    let result = records;
+    if (filter['validation.isValid'] !== undefined) {
+      result = result.filter(r => r.validation?.isValid === filter['validation.isValid']);
+    }
+    
+    const query = {
+      sort: (sortObj) => {
+        result = [...result].reverse();
+        return query;
+      },
+      limit: (n) => {
+        result = result.slice(0, n);
+        return query;
+      },
+      lean: () => {
+        return query;
+      },
+      then: (resolve, reject) => {
+        resolve(result);
+      }
+    };
+    return query;
+  }
 
-module.exports = mongoose.model('Invoice', InvoiceSchema);
+  static async insertMany(docs) {
+    const toInsert = docs.map(d => ({ ...d, _id: uuidv4(), createdAt: new Date(), updatedAt: new Date() }));
+    records.push(...toInsert);
+    return toInsert;
+  }
+
+  static async deleteMany(filter = {}) {
+    records = [];
+    return { deletedCount: records.length };
+  }
+}
+
+module.exports = InvoiceModel;
