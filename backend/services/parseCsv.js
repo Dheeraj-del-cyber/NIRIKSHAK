@@ -23,4 +23,15 @@ function parseCsvBuffer(buffer) {
   }));
 }
 
-module.exports = { parseCsvBuffer };
+// Generic CSV -> array-of-objects parser (headers kept as-is, values kept as
+// strings). Used by the revenue-leakage upload routes, which each map the
+// raw columns onto their own typed shape.
+function parseGenericCsvBuffer(buffer) {
+  return parse(buffer, {
+    columns: (header) => header.map((h) => h.trim()),
+    skip_empty_lines: true,
+    trim: true,
+  });
+}
+
+module.exports = { parseCsvBuffer, parseGenericCsvBuffer };

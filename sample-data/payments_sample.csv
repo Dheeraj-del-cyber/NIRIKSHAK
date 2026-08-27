@@ -1,0 +1,8 @@
+paymentId,customerId,customerName,invoiceNo,amountDue,amountPaid,dueDate,paidDate,status,renewalStatus
+PAY-9001,CUST-001,Anand Textiles,INV-3001,10500,10500,2026-07-20,2026-07-19,paid,renewed
+PAY-9002,CUST-002,Bala Traders,INV-3002,34000,0,2026-06-30,,overdue,na
+PAY-9003,CUST-003,Chera Retail,INV-3003,7300,0,2026-07-25,,pending,na
+PAY-9004,CUST-004,Deepam Foods,INV-3004,18600,18600,2026-07-30,2026-07-28,paid,renewed
+PAY-9005,CUST-006,Falcon Logistics,INV-3009,16500,0,2026-08-01,,failed,failed_renewal
+PAY-9006,CUST-007,Ganga Pharma,INV-3010,11300,0,2026-08-10,,failed,failed_renewal
+PAY-9007,CUST-008,Harini Enterprises,INV-3011,22000,0,2026-06-15,,overdue,na

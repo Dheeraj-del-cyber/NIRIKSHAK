@@ -82,6 +82,34 @@ Click the ✔ (confirm) or ✕ (false positive) icon on a flagged row. That
 mismatch type's weight in `PatternWeight` shifts, so its risk score on future
 runs moves up or down — the "Continuous Feedback Loop" from the deck.
 
+## Revenue Leakage & Risk module
+
+A second module, reachable from the hamburger menu (**☰ → Revenue Leakage &
+Risk**) alongside GST Reconciliation, analyzes transaction/payment/customer
+data end-to-end:
+
+- Detects unusual discounts and refunds
+- Detects overdue payments and failed renewals
+- Predicts customers likely to churn (recency, spend trend, complaints,
+  failed renewals — a transparent, explainable scoring model, same
+  philosophy as the reconciliation engine)
+- Produces a 0-100 revenue-risk score, with a plain-language explanation and
+  recommended corrective actions per flagged item
+- Estimates potentially recoverable revenue per leak type
+
+Try it with `sample-data/transactions_sample.csv`,
+`sample-data/payments_sample.csv`, and `sample-data/customers_sample.csv` —
+upload all three in the module's upload panel, then click **Run
+Revenue-Risk Analysis**.
+
+Backend pieces: `backend/models/{Transaction,Payment,Customer,RevenueLeak}.js`,
+`backend/services/revenueRisk.js`, `backend/routes/revenue.js` (mounted at
+`/api/revenue`). Frontend pieces: `frontend/src/pages/RevenueRiskPage.jsx`
+and `frontend/src/components/revenue/*`. Like the reconciliation module,
+this is a rule-based engine, not a trained ML classifier — the next step for
+churn prediction specifically would be a classifier trained on historical
+churn outcomes once enough labeled data exists.
+
 ## API summary
 
 | Method & path | Purpose |

@@ -6,6 +6,7 @@ const morgan = require('morgan');
 const invoiceRoutes = require('./routes/invoices');
 const gstRoutes = require('./routes/gst');
 const analysisRoutes = require('./routes/analysis');
+const revenueRoutes = require('./routes/revenue');
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.get('/api/health', (req, res) => res.json({ ok: true, service: 'nirikshak-ba
 app.use('/api/invoices', invoiceRoutes);
 app.use('/api/gst', gstRoutes);
 app.use('/api/analysis', analysisRoutes);
+app.use('/api/revenue', revenueRoutes);
 
 // Centralized error handler
 app.use((err, req, res, next) => {
