@@ -18,6 +18,8 @@ import MenuIcon from '@mui/icons-material/Menu';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import HubIcon from '@mui/icons-material/Hub';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
 
 const HEADER_HEIGHT = 64;
 const FOOTER_HEIGHT = 48;
@@ -34,6 +36,18 @@ const NAV_ITEMS = [
         label: 'Revenue Leakage & Risk',
         description: 'Discounts, refunds, overdue payments, churn',
         icon: <TrendingDownIcon />,
+    },
+    {
+        id: 'digital-twin',
+        label: 'Digital Twin & Expected Revenue',
+        description: '"What you should have earned" vs. actual',
+        icon: <HubIcon />,
+    },
+    {
+        id: 'hidden-leakage',
+        label: 'Hidden Leakage & Chain Detection',
+        description: 'Leaks only visible when signals are connected',
+        icon: <AccountTreeIcon />,
     },
 ];
 
