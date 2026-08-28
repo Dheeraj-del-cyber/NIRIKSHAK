@@ -15,7 +15,6 @@ import {
     Stack,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import VisibilityIcon from '@mui/icons-material/Visibility';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import HubIcon from '@mui/icons-material/Hub';
@@ -24,8 +23,6 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import WhatshotIcon from '@mui/icons-material/Whatshot';
 
 const HEADER_HEIGHT = 64;
-const FOOTER_HEIGHT = 48;
-
 const NAV_ITEMS = [
     {
         id: 'reconciliation',
@@ -91,10 +88,7 @@ export default function AppLayout({ activeSection, onSectionChange, children }) 
                     >
                         <MenuIcon />
                     </IconButton>
-                    <VisibilityIcon sx={{ mr: 1.25 }} />
-                    <Typography variant="h6" sx={{ fontWeight: 700, letterSpacing: 0.5 }}>
-                        NIRIKSHAK
-                    </Typography>
+                    <Box component="img" src="/logo.png" alt="NIRIKSHAK" sx={{ height: 60, mr: 1.25, borderRadius: 1, filter: 'brightness(0) invert(1)' }} />
                     <Box sx={{ flexGrow: 1 }} />
                     <Chip
                         size="small"
@@ -108,10 +102,7 @@ export default function AppLayout({ activeSection, onSectionChange, children }) 
                 <Box sx={{ width: 300 }} role="presentation">
                     <Box sx={{ px: 2.5, py: 2.5, background: 'linear-gradient(90deg, #0F4C5C 0%, #12707F 100%)' }}>
                         <Stack direction="row" spacing={1.25} alignItems="center">
-                            <VisibilityIcon sx={{ color: 'white' }} />
-                            <Typography variant="h6" sx={{ color: 'white', fontWeight: 700 }}>
-                                NIRIKSHAK
-                            </Typography>
+                            <Box component="img" src="/logo.png" alt="NIRIKSHAK" sx={{ height: 60, borderRadius: 1, filter: 'brightness(0) invert(1)' }} />
                         </Stack>
                         <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.85)' }}>
                             AI-powered revenue assurance
@@ -148,7 +139,7 @@ export default function AppLayout({ activeSection, onSectionChange, children }) 
                 component="main"
                 sx={{
                     pt: `${HEADER_HEIGHT + 24}px`,
-                    pb: `${FOOTER_HEIGHT + 24}px`,
+                    pb: '24px',
                     minHeight: '100vh',
                     boxSizing: 'border-box',
                 }}
@@ -156,27 +147,7 @@ export default function AppLayout({ activeSection, onSectionChange, children }) 
                 {children}
             </Box>
 
-            <Box
-                component="footer"
-                sx={{
-                    position: 'fixed',
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    height: FOOTER_HEIGHT,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    px: 2,
-                    bgcolor: 'grey.900',
-                    color: 'grey.300',
-                    zIndex: (theme) => theme.zIndex.appBar,
-                }}
-            >
-                <Typography variant="caption" sx={{ textAlign: 'center' }}>
-                    NIRIKSHAK — AI-Powered Revenue Assurance · prototype build, not production-audited
-                </Typography>
-            </Box>
+
         </Box>
     );
 }
