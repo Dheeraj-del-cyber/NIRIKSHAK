@@ -11,5 +11,6 @@ export const uploadPayments = (file) => uploadFile('/revenue/payments/upload', f
 export const uploadCustomers = (file) => uploadFile('/revenue/customers/upload', file);
 
 export const runRevenueAnalysis = () => api.post('/revenue/run');
+export const runRevenueSimulate = (scenarioIndex = 0) => api.post('/revenue/simulate', { scenarioIndex });
 export const getRevenueSummary = () => api.get('/revenue/summary');
 export const getRevenueLeaks = (params = {}) => api.get('/revenue/leaks', { params });
