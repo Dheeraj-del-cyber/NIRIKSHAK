@@ -4,6 +4,12 @@ const { v4: uuidv4 } = require('uuid');
 let records = [];
 
 class CustomerModel {
+    static async countDocuments(filter = {}) {
+        let result = records;
+        if (filter.customerId) result = result.filter((r) => r.customerId === filter.customerId);
+        return result.length;
+    }
+
     static find(filter = {}) {
         let result = records;
         const query = {

@@ -28,6 +28,13 @@ class RevenueLeakInstance {
 }
 
 class RevenueLeakModel {
+    static async countDocuments(filter = {}) {
+        let result = records;
+        if (filter.status) result = result.filter((r) => r.status === filter.status);
+        if (filter.type) result = result.filter((r) => r.type === filter.type);
+        return result.length;
+    }
+
     static find(filter = {}) {
         let result = records;
         if (filter.status) result = result.filter((r) => r.status === filter.status);
